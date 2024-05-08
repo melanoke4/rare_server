@@ -1,30 +1,28 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-
+from views import get_all_comments, get_comment_by_id
 from views.user import create_user, login_user
-
+from urllib.parse import urlparse, parse_qs
 
 class HandleRequests(BaseHTTPRequestHandler):
-    """Handles the requests to this server"""
-
-    def parse_url(self):
+    def parse_url(self, path):
         """Parse the url into the resource and id"""
-        path_params = self.path.split('/')
+        parsed_url = urlparse(path)
+        path_params = parsed_url.path.split('/')
         resource = path_params[1]
-        if '?' in resource:
-            param = resource.split('?')[1]
-            resource = resource.split('?')[0]
-            pair = param.split('=')
-            key = pair[0]
-            value = pair[1]
-            return (resource, key, value)
-        else:
-            id = None
-            try:
-                id = int(path_params[2])
-            except (IndexError, ValueError):
-                pass
-            return (resource, id)
+
+        if parsed_url.query:
+            query = parse_qs(parsed_url.query)
+            return (resource, query)
+
+        pk = None
+        try:
+            pk = int(path_params[2])
+        except (IndexError, ValueError):
+            pass
+        return (resource, pk)
+
+
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin
@@ -50,8 +48,33 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        """Handle Get requests to the server"""
-        pass
+        self._set_headers(200)
+
+        response = {}
+
+        # Parse URL and store entire tuple in a variable
+        parsed = self.parse_url(self.path)
+
+        # If the path does not include a query parameter, continue with the original if block
+        if '?' not in self.path:
+            (resource, id) = parsed
+
+            # It's an if..else statement
+            if resource == "comments":
+                if id is not None:
+                    response = get_comment_by_id(id)
+                else:
+                    response = get_all_comments()
+
+        self.wfile.write(json.dumps(response).encode())
+
+
+
+
+
+
+
+
 
 
     def do_POST(self):

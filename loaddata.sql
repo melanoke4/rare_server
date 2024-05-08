@@ -39,7 +39,7 @@ CREATE TABLE "Posts" (
   "image_url" varchar,
   "content" varchar,
   "approved" bit,
-  FOREIGN KEY(`user_id`) REFERENCES `Users`(`id`),
+  FOREIGN KEY(`user_id`) REFERENCES `Users`(`id`)
 );
 
 CREATE TABLE "Comments" (
@@ -88,3 +88,9 @@ CREATE TABLE "Categories" (
 INSERT INTO Categories ('label') VALUES ('News');
 INSERT INTO Tags ('label') VALUES ('JavaScript');
 INSERT INTO Reactions ('label', 'image_url') VALUES ('happy', 'https://pngtree.com/so/happy');
+
+
+INSERT INTO `Comments` VALUES (null, 1, 1, "content test 1");
+INSERT INTO `Comments` VALUES (null, 2, 2, "content test 2");
+INSERT INTO `Comments` VALUES (null, 3, 3, "content test 3");
+INSERT INTO `Comments` VALUES (null, 4, 4, "content test 4");
