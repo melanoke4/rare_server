@@ -85,9 +85,11 @@ CREATE TABLE "Categories" (
   "label" varchar
 );
 
+INSERT INTO Posts ('user_id', 'category_id', 'title', 'publication_date', 'image_url', 'content', 'approved') VALUES (11, 1, 'title', 'publication_date', 'https://pngtree.com/so/happy', 'content', false);
 INSERT INTO Categories ('label') VALUES ('News');
 INSERT INTO Tags ('label') VALUES ('JavaScript');
 INSERT INTO Reactions ('label', 'image_url') VALUES ('happy', 'https://pngtree.com/so/happy');
+
 
 
 INSERT INTO `Comments` VALUES (null, 1, 1, "content test 1");
@@ -97,3 +99,4 @@ INSERT INTO `Comments` VALUES (null, 4, 4, "content test 4");
 INSERT INTO `Comments` VALUES (null, 5, 5, "content test 5");
 
 SELECT * FROM Comments ORDER BY id DESC;
+
