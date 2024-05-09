@@ -1,10 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-
 from views import get_all_comments, get_comment_by_id, delete_comment,update_comment, create_comment
-
-from views import *
-
 from views.user import create_user, login_user
 from urllib.parse import urlparse, parse_qs
 
@@ -56,18 +52,14 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         response = {}
 
+        # Parse URL and store entire tuple in a variable
+        parsed = self.parse_url(self.path)
 
-        parsed = self.parse_url()
-
+        # If the path does not include a query parameter, continue with the original if block
         if '?' not in self.path:
             (resource, id) = parsed
 
-            if resource == "posts":
-                if id is not None:
-                    response = get_single_post(id)
-                else:
-                    response = get_all_posts()
-                    
+            # It's an if..else statement
             if resource == "comments":
                 if id is not None:
                     response = get_comment_by_id(id)
@@ -76,11 +68,12 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         self.wfile.write(json.dumps(response).encode())
 
+
     def do_POST(self):
+        """Make a post request to the server"""
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
-
         (resource, id) = self.parse_url(self.path)
         new_entity = None
 
@@ -88,7 +81,7 @@ class HandleRequests(BaseHTTPRequestHandler):
             new_entity = login_user(post_body)
         elif resource == 'register':
             new_entity = create_user(post_body)
-        elif resource == "comments":
+        elif resource == "locations":
             new_entity = create_comment(post_body)
 
         self.wfile.write(json.dumps(new_entity).encode())
@@ -110,55 +103,6 @@ class HandleRequests(BaseHTTPRequestHandler):
             # will return either True or False from `update_animal`
             success = update_comment(id, post_body)
         # rest of the elif's
-
-        response = ''
-        resource, _ = self.parse_url()
-        
-        new_item = None
-
-        if resource == 'login':
-            response = login_user(post_body)
-            
-        if resource == 'register':
-            response = create_user(post_body)
-        
-        if resource == 'posts':
-            new_item = create_post(post_body)
-
-        self.wfile.write(response.encode())
-        
-
-    def do_PUT(self):
-        self._set_headers(204)
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len)
-        post_body = json.loads(post_body)
-
-        (resource, id) = self.parse_url()
-        
-        success = False
-
-        if resource == "posts":
-            success = update_post(id, post_body)
-            
-                            
-        if success:
-            self._set_headers(204)
-        else:
-            self._set_headers(404)
-
-        self.wfile.write("".encode())
-
-    def do_DELETE(self):
-        self._set_headers(204)
-
-        (resource, id) = self.parse_url()
-
-        if resource == "posts":
-            delete_post(id)
-            
-        self.wfile.write("".encode())
-
 
         # handle the value of success
         if success:

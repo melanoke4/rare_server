@@ -36,25 +36,19 @@ COMMENTS = [
   },
 ]
 def create_comment(comment):
-    with sqlite3.connect("./db.sqlite3") as conn:
-        db_cursor = conn.cursor()
+    # Get the id value of the last customer in the list
+    max_id = COMMENTS[-1]["id"]
 
-        # Get the maximum id from the database
-        db_cursor.execute("SELECT MAX(id) FROM Comments")
-        max_id = db_cursor.fetchone()[0]
+    # Add 1 to whatever that number is
+    new_id = max_id + 1
 
-        # Calculate the new id
-        new_id = max_id + 1 if max_id else 1
+    # Add an `id` property to the customer dictionary
+    comment["id"] = new_id
 
-        # Add the id to the comment dictionary
-        comment["id"] = new_id
+    # Add the customer dictionary to the list
+    COMMENTS.append(comment)
 
-        # Insert the comment into the database
-        db_cursor.execute("""
-            INSERT INTO Comments (id, author_id, post_id, content)
-            VALUES (?, ?, ?, ?)
-        """, (new_id, comment["author_id"], comment["post_id"], comment["content"]))
-
+    # Return the dictionary with `id` property added
     return comment
   
   
@@ -120,16 +114,17 @@ def delete_comment(id):
 def update_comment(id, new_comment):
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
-
+      
         db_cursor.execute("""
-        UPDATE Comments
-        SET
-            author_id = ?,
-            post_id = ?,
-            content = ?
-        WHERE id = ?
-        """, (new_comment['author_id'], new_comment['post_id'],
-              new_comment['content'], id, ))
+            UPDATE Comments
+            SET
+                author_id = ?,
+                post_id = ?,
+                content = ?
+            WHERE id = ?
+        """, (new_comment['author_id'], 
+              new_comment['post_id'], 
+              new_comment['content'], id))
 
         # Check if any rows were affected
         rows_affected = db_cursor.rowcount
