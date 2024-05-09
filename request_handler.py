@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from views import get_all_comments, get_comment_by_id
+from views import *
 from views.user import create_user, login_user
 from urllib.parse import urlparse, parse_qs
 
@@ -52,14 +52,18 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         response = {}
 
-        # Parse URL and store entire tuple in a variable
-        parsed = self.parse_url(self.path)
 
-        # If the path does not include a query parameter, continue with the original if block
+        parsed = self.parse_url()
+
         if '?' not in self.path:
             (resource, id) = parsed
 
-            # It's an if..else statement
+            if resource == "posts":
+                if id is not None:
+                    response = get_single_post(id)
+                else:
+                    response = get_all_posts()
+                    
             if resource == "comments":
                 if id is not None:
                     response = get_comment_by_id(id)
@@ -67,38 +71,59 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_all_comments()
 
         self.wfile.write(json.dumps(response).encode())
-
-
-
-
-
-
-
-
-
+    
 
     def do_POST(self):
-        """Make a post request to the server"""
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
         response = ''
         resource, _ = self.parse_url()
+        
+        new_item = None
 
         if resource == 'login':
             response = login_user(post_body)
+            
         if resource == 'register':
             response = create_user(post_body)
+        
+        if resource == 'posts':
+            new_item = create_post(post_body)
 
         self.wfile.write(response.encode())
+        
 
     def do_PUT(self):
-        """Handles PUT requests to the server"""
-        pass
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+
+        (resource, id) = self.parse_url()
+        
+        success = False
+
+        if resource == "posts":
+            success = update_post(id, post_body)
+            
+                            
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
+
+        self.wfile.write("".encode())
 
     def do_DELETE(self):
-        """Handle DELETE Requests"""
-        pass
+        self._set_headers(204)
+
+        (resource, id) = self.parse_url()
+
+        if resource == "posts":
+            delete_post(id)
+            
+        self.wfile.write("".encode())
 
 
 def main():
