@@ -81,7 +81,7 @@ class HandleRequests(BaseHTTPRequestHandler):
             new_entity = login_user(post_body)
         elif resource == 'register':
             new_entity = create_user(post_body)
-        elif resource == "comments":
+        elif resource == "locations":
             new_entity = create_comment(post_body)
 
         self.wfile.write(json.dumps(new_entity).encode())

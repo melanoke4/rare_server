@@ -123,16 +123,22 @@ def update_comment(id, new_comment):
 
         db_cursor.execute("""
         UPDATE Comments
-        SET
-            author_id = ?,
-            post_id = ?,
-            content = ?
+            SET
+                author_id = ?,
+                post_id = ?,
+                content = ?,
         WHERE id = ?
         """, (new_comment['author_id'], new_comment['post_id'],
               new_comment['content'], id, ))
 
-        # Check if any rows were affected
+        # Were any rows affected?
+        # Did the client send an `id` that exists?
         rows_affected = db_cursor.rowcount
 
-    # Return value indicating success or failure
-    return rows_affected > 0
+    # return value of this function
+    if rows_affected == 0:
+        # Forces 404 response by main module
+        return False
+    else:
+        # Forces 204 response by main module
+        return True

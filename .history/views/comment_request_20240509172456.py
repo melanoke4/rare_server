@@ -1,6 +1,5 @@
 import sqlite3
 import json
-from models import Comments
 
 class Comments():
     def __init__(self, id, author_id, post_id, content):
@@ -35,27 +34,30 @@ COMMENTS = [
     "content": "content test 4" 
   },
 ]
-def create_comment(comment):
-    with sqlite3.connect("./db.sqlite3") as conn:
+def create_comment(new_comment):
+    with sqlite3.connect("./dbs.qlite3") as conn:
         db_cursor = conn.cursor()
 
-        # Get the maximum id from the database
-        db_cursor.execute("SELECT MAX(id) FROM Comments")
-        max_id = db_cursor.fetchone()[0]
-
-        # Calculate the new id
-        new_id = max_id + 1 if max_id else 1
-
-        # Add the id to the comment dictionary
-        comment["id"] = new_id
-
-        # Insert the comment into the database
         db_cursor.execute("""
-            INSERT INTO Comments (id, author_id, post_id, content)
-            VALUES (?, ?, ?, ?)
-        """, (new_id, comment["author_id"], comment["post_id"], comment["content"]))
+        INSERT INTO Comments
+            (author_id, post_id, content)
+        VALUES
+            (?, ?, ?);
+        """, (new_comment['author_id'], 
+              new_comment['post_id'],
+              new_comment['content']))
 
-    return comment
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
+
+        # Add the `id` property to the comment dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_comment['id'] = id
+
+    return new_comment
   
   
 def get_all_comments():
@@ -120,16 +122,17 @@ def delete_comment(id):
 def update_comment(id, new_comment):
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
-
+      
         db_cursor.execute("""
-        UPDATE Comments
-        SET
-            author_id = ?,
-            post_id = ?,
-            content = ?
-        WHERE id = ?
-        """, (new_comment['author_id'], new_comment['post_id'],
-              new_comment['content'], id, ))
+            UPDATE Comments
+            SET
+                author_id = ?,
+                post_id = ?,
+                content = ?
+            WHERE id = ?
+        """, (new_comment['author_id'], 
+              new_comment['post_id'], 
+              new_comment['content'], id))
 
         # Check if any rows were affected
         rows_affected = db_cursor.rowcount
