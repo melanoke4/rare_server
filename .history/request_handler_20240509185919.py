@@ -55,7 +55,9 @@ class HandleRequests(BaseHTTPRequestHandler):
         self._set_headers(200)
 
         response = {}
-        parsed = self.parse_url(self.path)
+
+
+        parsed = self.parse_url()
 
         if '?' not in self.path:
             (resource, id) = parsed
@@ -65,16 +67,14 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_post(id)
                 else:
                     response = get_all_posts()
-                            
-            elif resource == "comments":
+                    
+            if resource == "comments":
                 if id is not None:
                     response = get_comment_by_id(id)
                 else:
                     response = get_all_comments()
 
         self.wfile.write(json.dumps(response).encode())
-
-
 
     def do_POST(self):
         self._set_headers(201)

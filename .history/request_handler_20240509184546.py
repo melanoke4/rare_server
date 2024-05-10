@@ -103,43 +103,69 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
+        # set default value of success
         success = False
 
         if resource == "comments":
+            # will return either True or False from `update_animal`
             success = update_comment(id, post_body)
-        elif resource == 'login':
-            # Handle login update (if needed)
-            pass
-        elif resource == 'register':
-            # Handle registration update (if needed)
-            pass
-        elif resource == 'posts':
+        # rest of the elif's
+
+        response = ''
+        resource, _ = self.parse_url()
+        
+        new_item = None
+
+        if resource == 'login':
+            response = login_user(post_body)
+            
+        if resource == 'register':
+            response = create_user(post_body)
+        
+        if resource == 'posts':
+            new_item = create_post(post_body)
+
+        self.wfile.write(response.encode())
+        
+
+    def do_PUT(self):
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+
+        (resource, id) = self.parse_url()
+        
+        success = False
+
+        if resource == "posts":
             success = update_post(id, post_body)
-        else:
-            # Handle unknown resource
-            pass
-
+            
+                            
         if success:
-            self.send_response(204)
+            self._set_headers(204)
         else:
-            self.send_response(404)
+            self._set_headers(404)
 
-        self.end_headers()
         self.wfile.write("".encode())
-
-
 
     def do_DELETE(self):
         self.send_response(204)
         self.end_headers()
+
+        # Assuming parse_url() extracts the resource and id from the URL
         (resource, id) = self.parse_url(self.path)
-        if resource == "comments":
+
+        if resource == "posts":
+            delete_post(id)
+        elif resource == "comments":
             delete_comment(id)
+        else:
+            # Handle unknown resource
+            pass
+
         self.wfile.write("".encode())
 
-
-
- 
 
 def main():
     """Starts the server on port 8088 using the HandleRequests class
