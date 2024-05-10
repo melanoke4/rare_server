@@ -5,28 +5,31 @@ from views import get_all_comments, get_comment_by_id, delete_comment,update_com
 
 from views import *
 
-from views import create_user, login_user, get_all_users, get_single_user
+from views.user_request import create_user, get_all_users, get_single_user, login_user
 from urllib.parse import urlparse, parse_qs
 
 class HandleRequests(BaseHTTPRequestHandler):
+    """Handles the requests to this server"""
+
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
         path_params = parsed_url.path.split('/')
         resource = path_params[1]
-
-        if parsed_url.query:
-            query = parse_qs(parsed_url.query)
-            return (resource, query)
-
-        pk = None
-        try:
-            pk = int(path_params[2])
-        except (IndexError, ValueError):
-            pass
-        return (resource, pk)
-
-
+        if '?' in resource:
+            param = resource.split('?')[1]
+            resource = resource.split('?')[0]
+            pair = param.split('=')
+            key = pair[0]
+            value = pair[1]
+            return (resource, key, value)
+        else:
+            id = None
+            try:
+                id = int(path_params[2])
+            except (IndexError, ValueError):
+                pass
+            return (resource, id)
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin
@@ -83,21 +86,21 @@ class HandleRequests(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
+        """Make a post request to the server"""
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
-
-        (resource, id) = self.parse_url(self.path)
-        new_entity = None
+        response = ''
+        resource, _ = self.parse_url(self.path)
 
         if resource == 'login':
-            new_entity = login_user(post_body)
+            response = login_user(post_body)
         elif resource == 'register':
-            new_entity = create_user(post_body)
+            response = create_user(post_body)
         elif resource == "comments":
-            new_entity = create_comment(post_body)
+            response = create_comment(post_body)
 
-        self.wfile.write(json.dumps(new_entity).encode())
+        self.wfile.write(response.encode())
 
 
 
