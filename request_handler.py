@@ -56,7 +56,6 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers(200)
-
         response = {}
         parsed = self.parse_url(self.path)
 
@@ -84,9 +83,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(response).encode())
 
 
-
     def do_POST(self):
-        """Make a post request to the server"""
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
@@ -95,14 +92,20 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         if resource == 'login':
             response = login_user(post_body)
-        elif resource == 'register':
+        if resource == 'register':
             response = create_user(post_body)
-        elif resource == "comments":
-            response = create_comment(post_body)
 
-        self.wfile.write(response.encode())
+        new_item = None
 
+        if resource == "posts":
+            new_item = create_post(post_body)
 
+        if resource == 'comments':
+            new_item = create_comment(post_body)
+
+        self.wfile.write(json.dumps(new_item).encode())
+
+        return response
 
     def do_PUT(self):
         content_len = int(self.headers.get('content-length', 0))
@@ -114,19 +117,13 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         success = False
 
+        
         if resource == "comments":
             success = update_comment(id, post_body)
-        elif resource == 'login':
-            # Handle login update (if needed)
-            pass
-        elif resource == 'register':
-            # Handle registration update (if needed)
-            pass
+            
         elif resource == 'posts':
             success = update_post(id, post_body)
-        else:
-            # Handle unknown resource
-            pass
+        
 
         if success:
             self.send_response(204)
@@ -142,8 +139,13 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
         (resource, id) = self.parse_url(self.path)
+        
         if resource == "comments":
             delete_comment(id)
+        
+        if resource == "posts":
+            delete_post(id)
+        
         self.wfile.write("".encode())
 
 
