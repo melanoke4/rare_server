@@ -100,3 +100,4 @@ INSERT INTO `Comments` VALUES (null, 5, 5, "content test 5");
 
 SELECT * FROM Comments ORDER BY id DESC;
 
+INSERT INTO `Users` VALUES (null, "Mars", "Bars", "marsbars@gmail.com", "Just here", "marsbars123", "asecret", "link.png", "2023-05-30", true); 

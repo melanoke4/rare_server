@@ -90,7 +90,8 @@ def update_post(id, new_post):
                 title = ?,
                 publication_date = ?,
                 image_url = ?,
-                content = ?
+                content = ?,
+                approved = ?
         WHERE id = ?
         """, (new_post['user_id'], 
               new_post['category_id'], 
