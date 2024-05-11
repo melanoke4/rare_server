@@ -90,6 +90,9 @@ class HandleRequests(BaseHTTPRequestHandler):
             new_entity = create_user(post_body)
         elif resource == "comments":
             new_entity = create_comment(post_body)
+            
+        elif resource == 'posts':
+            new_item = create_post(post_body)
 
         self.wfile.write(json.dumps(new_entity).encode())
 
@@ -107,12 +110,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         if resource == "comments":
             success = update_comment(id, post_body)
-        elif resource == 'login':
-            # Handle login update (if needed)
-            pass
-        elif resource == 'register':
-            # Handle registration update (if needed)
-            pass
+            
         elif resource == 'posts':
             success = update_post(id, post_body)
         else:
@@ -133,8 +131,13 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
         (resource, id) = self.parse_url(self.path)
+        
         if resource == "comments":
             delete_comment(id)
+        
+        if resource == "posts":
+            delete_post(id)
+        
         self.wfile.write("".encode())
 
 
