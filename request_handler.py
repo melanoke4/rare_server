@@ -5,7 +5,7 @@ from views import get_all_comments, get_comment_by_id, delete_comment,update_com
 
 from views import *
 
-from views.user_request import create_user, get_all_users, get_single_user, login_user
+from views.user_request import create_user, get_all_users, get_single_user, login_user, update_user
 from urllib.parse import urlparse, parse_qs
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -123,6 +123,9 @@ class HandleRequests(BaseHTTPRequestHandler):
             
         elif resource == 'posts':
             success = update_post(id, post_body)
+        
+        elif resource == 'users':
+            success = update_user(id, post_body)
         
 
         if success:
