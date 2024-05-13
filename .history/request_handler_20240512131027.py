@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
-from views import get_all_comments, get_comment_by_id, delete_comment,update_comment, create_comment, get_all_categories, get_single_category, delete_category, create_category, update_category
+from views import get_all_comments, get_comment_by_id, delete_comment,update_comment, create_comment, get_all_categories, get_single_category, delete_category, create_category
 
 from views import *
 
@@ -109,9 +109,6 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         if resource == 'comments':
             new_item = create_comment(post_body)
-            
-        if resource == 'categories':
-            new_item = create_category(post_body)    
 
         self.wfile.write(json.dumps(new_item).encode())
 
@@ -137,9 +134,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         elif resource == 'users':
             success = update_user(id, post_body)
         
-        elif resource == 'categories':
-            success = update_category(id, post_body)
-        
+
         if success:
             self.send_response(204)
         else:
